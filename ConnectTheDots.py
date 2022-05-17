@@ -17,32 +17,32 @@ def centerPoint(point):
         #Unknown...
         print('exception')
     return ret
-        
+
 def validatePoint(point):
     ret = False
     if point.isValid and point.connectedEntities and not centerPoint(point):
         ret = True
     return ret
-        
+
 
 def run(context):
     ui = None
     threshold_distance = 0.09
     merge_count = 0
     error_count = 0
-    t0 = time.clock()
+    t0 = time.time()
     try:
+
         app = adsk.core.Application.get()
         ui  = app.userInterface
+
         selection = ui.activeSelections.all
-        points = adsk.core.ObjectCollection.create()
-        
-        #Add only sketchpoints to the points collection
-        [points.add(item) for item in selection if isinstance(item, adsk.fusion.SketchPoint)]
-        print(len(points))
+
+        points = [item for item in selection if isinstance(item, adsk.fusion.SketchPoint)]
+
         #Enumerate (add an index to the )
-        for index,point in enumerate(points): 
-            #Ignore invalid points, points that aren't connected to objects, and aren't center points for circles, arcs, and curves... 
+        for index,point in enumerate(points):
+            #Ignore invalid points, points that aren't connected to objects, and aren't center points for circles, arcs, and curves...
             if validatePoint(point):
                 for merge in points[index+1:]:
                     if validatePoint(merge):
@@ -54,8 +54,8 @@ def run(context):
                                 error_count += 1
                             merge_count += 1
                             adsk.doEvents()
-        duration = time.clock() - t0
-        ui.messageBox("ConnectTheDots has completed !\nConnected " + str(merge_count) + " dots of " + str(points.count) + " selected.\nThere were " + str(error_count) + " errors.\nDuration (seconds): " + str(duration) )
+        duration = time.time() - t0
+        ui.messageBox("ConnectTheDots has completed !\nConnected " + str(merge_count) + " dots of " + str(len(points)) + " selected.\nThere were " + str(error_count) + " errors.\nDuration (seconds): " + str(duration) )
 
     except:
         if ui:
